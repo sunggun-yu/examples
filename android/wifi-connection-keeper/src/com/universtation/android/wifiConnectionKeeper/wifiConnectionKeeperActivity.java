@@ -25,13 +25,16 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class wifiConnectionKeeperActivity extends Activity {
+
 	private WebView webview;
 	private Handler mHandler = new Handler();
-	Timer timer;
+	private Timer timer;
 	private int timeSlot = 10000;
 	private String connectUrl = "http://www.google.com";
 	private EditText timeNumber;
 	private TextView lastUpdated;
+	private ToggleButton toggleButton;
+	private static final String LOG_CATEGORY = "CONNECTION-KEEPER";
 
 	/** Called when the activity is first created. */
 	@Override
@@ -40,11 +43,11 @@ public class wifiConnectionKeeperActivity extends Activity {
 		setContentView(R.layout.main);
 		timeNumber = (EditText) findViewById(R.id.editText1);
 		lastUpdated = (TextView) findViewById(R.id.textViewLastUpdate);
-		
+
 		goWebView(connectUrl);
 
 		// ---ToggleButton---
-		ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
+		toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
 		toggleButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (((ToggleButton) v).isChecked())
@@ -57,22 +60,22 @@ public class wifiConnectionKeeperActivity extends Activity {
 
 	private void doAction(boolean toggle) {
 		if (toggle) {
-			Log.v("CONNECTION-KEEPER", "toggled");
+			Log.v(LOG_CATEGORY, "toggled");
 			setTimeSlot();
 			timer = new Timer();
 			timer.schedule(new MyTimerTask(), 0, timeSlot);
 		} else {
 			if (timer != null) {
-				Log.v("CONNECTION-KEEPER", "un-toggled");
+				Log.v(LOG_CATEGORY, "un-toggled");
 				timer.cancel();
-				Log.v("CONNECTION-KEEPER", "timer stopped");
+				Log.v(LOG_CATEGORY, "timer stopped");
 			}
 		}
 	}
 
 	private void setTimeSlot() {
 		String value = timeNumber.getText().toString();
-		Log.v("CONNECTION-KEEPER", "Time slot is : " + value);
+		Log.v(LOG_CATEGORY, "Time slot is : " + value);
 		timeSlot = Integer.valueOf(value) * 1000;
 	}
 
@@ -115,9 +118,11 @@ public class wifiConnectionKeeperActivity extends Activity {
 				while ((s = buffer.readLine()) != null) {
 					response += s;
 				}
-				Log.v("CONNECTION-KEEPER", "Page loaded");
+				Log.v(LOG_CATEGORY, "Page loaded");
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(LOG_CATEGORY, e.getMessage());
+				toggleButton.setPressed(false);
+				doAction(false);
 			}
 			return response;
 		}
